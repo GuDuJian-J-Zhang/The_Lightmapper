@@ -30,31 +30,39 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
 
     print("Building lightmaps")
 
+    # remove all baked files (needs to be optimized)
+    scene = bpy.context.scene
+    dirpath = os.path.join(os.path.dirname(bpy.data.filepath), scene.TLM_EngineProperties.tlm_lightmap_savedir)
+    if os.path.isdir(dirpath):
+        for file in os.listdir(dirpath):
+            os.remove(os.path.join(dirpath + "/" + file))
+
     if bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "combinedao": 
-
-        scene = bpy.context.scene
-
         if not "tlm_plus_mode" in bpy.app.driver_namespace or bpy.app.driver_namespace["tlm_plus_mode"] == 0:
             filepath = bpy.data.filepath
-            dirpath = os.path.join(os.path.dirname(bpy.data.filepath), scene.TLM_EngineProperties.tlm_lightmap_savedir)
-            if os.path.isdir(dirpath):
-                for file in os.listdir(dirpath):
-                    os.remove(os.path.join(dirpath + "/" + file))
             bpy.app.driver_namespace["tlm_plus_mode"] = 1
+            bpy.app.driver_namespace["tlm_baking_type"] = "COMBINED"
             print("Plus Mode")
+        else:
+           bpy.app.driver_namespace["tlm_baking_type"] = "AO"
 
-    if bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "indirectao": 
-
-        scene = bpy.context.scene
-
+    elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "indirectao": 
         if not "tlm_plus_mode" in bpy.app.driver_namespace or bpy.app.driver_namespace["tlm_plus_mode"] == 0:
             filepath = bpy.data.filepath
-            dirpath = os.path.join(os.path.dirname(bpy.data.filepath), scene.TLM_EngineProperties.tlm_lightmap_savedir)
-            if os.path.isdir(dirpath):
-                for file in os.listdir(dirpath):
-                    os.remove(os.path.join(dirpath + "/" + file))
             bpy.app.driver_namespace["tlm_plus_mode"] = 1
+            bpy.app.driver_namespace["tlm_baking_type"] = "DIFFUSE"
             print("Plus Mode")
+        else:
+           bpy.app.driver_namespace["tlm_baking_type"] = "AO" 
+
+    elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "indirect":
+        bpy.app.driver_namespace["tlm_baking_type"] = "DIFFUSE"
+    elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "ao":
+        bpy.app.driver_namespace["tlm_baking_type"] = "AO"
+    elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "combined":
+        bpy.app.driver_namespace["tlm_baking_type"] = "COMBINED"
+    elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "complete":
+        bpy.app.driver_namespace["tlm_baking_type"] = "COMPLETE"
 
     if bpy.context.scene.TLM_EngineProperties.tlm_bake_mode == "Foreground" or background_mode==True:
 
@@ -115,7 +123,7 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
 
             configure.init(self, previous_settings)
 
-        begin_build()
+        begin_build(self)
 
     else:
 
@@ -294,7 +302,7 @@ def finish_assemble(self=0, background_pass=0, load_atlas=0):
     else:
         manage_build(False, load_atlas)
 
-def begin_build():
+def begin_build(self):
 
     print("Beginning build")
 
@@ -705,9 +713,9 @@ def begin_build():
                         img = bpy.data.images.load(os.path.join(dirpath,file))
                         img.save_render(img.filepath_raw[:-4] + ".png")
 
-    manage_build()
+    manage_build(self)
 
-def manage_build(background_pass=False, load_atlas=0):
+def manage_build(self, background_pass=False, load_atlas=0):
 
     print("Managing build")
 
@@ -824,7 +832,7 @@ def manage_build(background_pass=False, load_atlas=0):
         else:
             supersampling_scale = 1
 
-        pack.postpack()
+        #pack.postpack()
         #We need to also make sure out postpacked atlases gets split w. premultiplied
         #CHECK FOR ATLAS MAPS!
 
@@ -957,28 +965,20 @@ def manage_build(background_pass=False, load_atlas=0):
                     if "_Original" in mat.name:
                         bpy.data.materials.remove(mat)
 
-            for obj in bpy.context.scene.objects:
-                if obj.type == 'MESH' and obj.name in bpy.context.view_layer.objects:
-                    if obj.TLM_ObjectProperties.tlm_mesh_lightmap_use:
-
-                        if obj.TLM_ObjectProperties.tlm_mesh_lightmap_unwrap_mode == "AtlasGroupA":
-                            atlasName = obj.TLM_ObjectProperties.tlm_atlas_pointer
-                            img_name = atlasName + '_baked'
-                            Lightmapimage = bpy.data.images[img_name]
-                            obj["Lightmap"] = Lightmapimage.filepath_raw
-                        elif obj.TLM_ObjectProperties.tlm_postpack_object:
-                            atlasName = obj.TLM_ObjectProperties.tlm_postatlas_pointer
-                            img_name = atlasName + '_baked' + ".hdr"
-                            Lightmapimage = bpy.data.images[img_name]
-                            obj["Lightmap"] = Lightmapimage.filepath_raw
-                        else:
-                            img_name = obj.name + '_baked'
-                            Lightmapimage = bpy.data.images[img_name]
-                            obj["Lightmap"] = Lightmapimage.filepath_raw
-
             for image in bpy.data.images:
                 if image.name.endswith("_baked"):
                     bpy.data.images.remove(image, do_unlink=True)
+
+        # rename file name
+        if "tlm_baking_type" in bpy.app.driver_namespace:
+            dirpath = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
+            files = os.listdir(dirpath)
+            for index, file in enumerate(files):
+
+                filename = extension = os.path.splitext(file)[0]
+                extension = os.path.splitext(file)[1]
+                if filename.endswith("_baked"):
+                    os.rename(os.path.join(dirpath, file), os.path.join(dirpath, filename + "_" + bpy.app.driver_namespace["tlm_baking_type"] + extension))
 
         if "tlm_plus_mode" in bpy.app.driver_namespace: #First DIR pass
 
@@ -1010,22 +1010,22 @@ def manage_build(background_pass=False, load_atlas=0):
                     if image.name.endswith("_baked"):
                         bpy.data.images.remove(image, do_unlink=True)
 
-                dirpath = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
+               #dirpath = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
 
-                files = os.listdir(dirpath)
+               #files = os.listdir(dirpath)
 
-                for index, file in enumerate(files):
+               #for index, file in enumerate(files):
 
-                    filename = extension = os.path.splitext(file)[0]
-                    extension = os.path.splitext(file)[1]
+               #    filename = extension = os.path.splitext(file)[0]
+               #    extension = os.path.splitext(file)[1]
 
-                    os.rename(os.path.join(dirpath, file), os.path.join(dirpath, filename + "_dir" + extension))
+               #    os.rename(os.path.join(dirpath, file), os.path.join(dirpath, filename + "_dir" + extension))
                 
                 print("First DIR pass complete")
 
                 bpy.app.driver_namespace["tlm_plus_mode"] = 2
 
-                prepare_build(self=0, background_mode=False, shutdown_after_build=False)
+                prepare_build(self, background_mode=False, shutdown_after_build=False)
 
                 if not background_pass and bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode != "combinedao":
                     #pass
@@ -1035,18 +1035,18 @@ def manage_build(background_pass=False, load_atlas=0):
 
                 filepath = bpy.data.filepath
 
-                dirpath = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
+               #dirpath = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
 
-                files = os.listdir(dirpath)
+               #files = os.listdir(dirpath)
 
-                for index, file in enumerate(files):
+               #for index, file in enumerate(files):
 
-                    filename = os.path.splitext(file)[0]
-                    extension = os.path.splitext(file)[1]
+               #    filename = os.path.splitext(file)[0]
+               #    extension = os.path.splitext(file)[1]
 
-                    if not filename.endswith("_dir"):
-                        os.rename(os.path.join(dirpath, file), os.path.join(dirpath, filename + "_ao" + extension))
-                
+               #    if not filename.endswith("_dir"):
+               #        os.rename(os.path.join(dirpath, file), os.path.join(dirpath, filename + "_ao" + extension))
+               #
                 print("Second AO pass complete")
 
                 total_time = sec_to_hours((time() - start_time))
@@ -1357,3 +1357,42 @@ def checkAtlasSize():
     else:
         return False
 
+class LightmapInfo:
+   bakingMode = ""
+   uri = ""
+
+   def to_dict(self):
+    return {"bakingMode": self.bakingMode, "uri": self.uri}
+ 
+def write_light_map_to_object():
+    dirpath = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
+    files = os.listdir(dirpath)
+    objectname_to_lightmap_info = {}
+    for index, file in enumerate(files):
+        filename = os.path.splitext(file)[0]
+        extension = os.path.splitext(file)[1]
+        filename_components = filename.split("_")
+        obj_name = filename_components[0]
+        if obj_name not in objectname_to_lightmap_info:
+            objectname_to_lightmap_info[obj_name] = []
+        lmInfo = LightmapInfo()
+        lmInfo.bakingMode = "None"
+        lmInfo.uri = os.path.join(bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir, file)
+        if len(filename_components) > 2:
+            if filename_components[2] == "AO":
+                lmInfo.bakingMode = "AO"
+            elif filename_components[2] == "DIFFUSE":
+                lmInfo.bakingMode = "Indirect"
+            elif filename_components[2] == "COMBINED":
+                lmInfo.bakingMode = "Combined"
+            elif filename_components[2] == "COMPLETE":
+                lmInfo.bakingMode = "Complete"
+        objectname_to_lightmap_info[obj_name].append(lmInfo)
+    for obj in bpy.context.scene.objects:
+        if obj.type == 'MESH' and obj.name in bpy.context.view_layer.objects:
+            if obj.TLM_ObjectProperties.tlm_mesh_lightmap_use:
+                if obj.name in objectname_to_lightmap_info:
+                   lm_list = []
+                   for lm_info in objectname_to_lightmap_info[obj.name]:
+                       lm_list.append(lm_info.to_dict())
+                   obj["lightmaps"] = lm_list

@@ -472,7 +472,7 @@ def applyAOPass():
                         nodes = mat.node_tree.nodes
 
                         for node in nodes:
-                            if node.name == "Baked Image" or node.name == "TLM_Lightmap":
+                            if (node.name == "Baked Image" or node.name == "TLM_Lightmap") and node.image:
 
                                 filepath = bpy.data.filepath
                                 dirpath = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
@@ -482,7 +482,7 @@ def applyAOPass():
                                 filebase = os.path.basename(LightmapPath)
                                 filename = os.path.splitext(filebase)[0]
                                 extension = os.path.splitext(filebase)[1]
-                                AOImagefile = filename[:-4] + "_ao"
+                                AOImagefile = filename[:-4] + "_AO"
                                 AOImagePath = os.path.join(dirpath, AOImagefile + extension)
 
                                 AOMap = nodes.new('ShaderNodeTexImage')

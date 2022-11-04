@@ -50,6 +50,7 @@ class TLM_BuildLightmaps(bpy.types.Operator):
         if not bpy.app.background:
 
             build.prepare_build(self, False)
+            build.write_light_map_to_object()
 
         else:
 
@@ -154,6 +155,8 @@ class TLM_CleanLightmaps(bpy.types.Operator):
 
                     if "Lightmap" in obj:
                         del obj["Lightmap"]
+                    if "lightmaps" in obj:
+                        del obj["lightmaps"]
 
         if bpy.context.scene.TLM_SceneProperties.tlm_repartition_on_clean:
 
