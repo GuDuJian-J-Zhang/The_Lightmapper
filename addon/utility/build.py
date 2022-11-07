@@ -33,9 +33,21 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
     # remove all baked files (needs to be optimized)
     scene = bpy.context.scene
     dirpath = os.path.join(os.path.dirname(bpy.data.filepath), scene.TLM_EngineProperties.tlm_lightmap_savedir)
+    # only remove those needs to be rebaked
     if os.path.isdir(dirpath):
+        obj_name_to_file_name_list = {}
         for file in os.listdir(dirpath):
-            os.remove(os.path.join(dirpath + "/" + file))
+            rt = file.split("_")
+            if len(rt):
+                obj_name = rt[0]
+                if obj_name not in obj_name_to_file_name_list:
+                    obj_name_to_file_name_list[obj_name] = []
+                obj_name_to_file_name_list[obj_name].append(file)
+        for obj_id in self.objectids_to_process:
+            obj = bpy.context.scene.objects[obj_id]
+            if obj.name in obj_name_to_file_name_list:
+                for file in obj_name_to_file_name_list[obj.name]:
+                    os.remove(os.path.join(dirpath + "/" + file))
 
     if bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "combinedao": 
         if not "tlm_plus_mode" in bpy.app.driver_namespace or bpy.app.driver_namespace["tlm_plus_mode"] == 0:
