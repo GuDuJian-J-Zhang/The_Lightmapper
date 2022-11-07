@@ -104,6 +104,7 @@ class TLM_CyclesSceneProperties(bpy.types.PropertyGroup):
                 ('indirect', 'Indirect', 'Bake indirect lighting'),
                 ('indirectao', 'Indirect+AO', 'Bake indirect lighting with Ambient Occlusion'),
                 ('ao', 'AO', 'Bake only Ambient Occlusion'),
+                ('shadow', 'Shadow', 'Bake only Shadow'),
                 ('complete', 'Complete', 'Bake complete map')],
                 name = "Lighting mode", 
                 description="TODO.", 

@@ -2,7 +2,7 @@ import bpy, os
 from .. import build
 from time import time, sleep
 
-def bake(plus_pass=0):
+def bake(self, plus_pass=0):
 
     if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
         print("Initializing lightmap baking.")
@@ -12,49 +12,12 @@ def bake(plus_pass=0):
         obj.select_set(False)
 
     currentIterNum = 0
-    objectids_to_process = []
-    object_id = 0
 
-    for obj in bpy.context.scene.objects:
-        if obj.type == 'MESH' and obj.name in bpy.context.view_layer.objects:
-
-            hidden = False
-
-            #We check if the object is hidden
-            if obj.hide_get():
-                hidden = True
-            if obj.hide_viewport:
-                hidden = True
-            if obj.hide_render:
-                hidden = True
-
-            #We check if the object's collection is hidden
-            collections = obj.users_collection
-
-            for collection in collections:
-
-                if collection.hide_viewport:
-                    hidden = True
-                if collection.hide_render:
-                    hidden = True
-                    
-                try:
-                    if collection.name in bpy.context.scene.view_layers[0].layer_collection.children:
-                        if bpy.context.scene.view_layers[0].layer_collection.children[collection.name].hide_viewport:
-                            hidden = True
-                except:
-                    print("Error: Could not find collection: " + collection.name)
-
-                if obj.TLM_ObjectProperties.tlm_mesh_lightmap_use and not hidden:
-                    objectids_to_process.append(object_id)
-
-        object_id = object_id + 1
-
-    iterNum = len(objectids_to_process)
+    iterNum = len(self.objectids_to_process)
     if iterNum > 1:
         iterNum = iterNum - 1
 
-    for id in objectids_to_process:
+    for id in self.objectids_to_process:
         obj = bpy.context.scene.objects[id]
 
         scene = bpy.context.scene
@@ -97,6 +60,9 @@ def bake(plus_pass=0):
         elif scene.TLM_EngineProperties.tlm_lighting_mode == "ao":
             print("Baking combined: AO")
             bpy.ops.object.bake(type="AO", margin=scene.TLM_EngineProperties.tlm_dilation_margin, use_clear=False)
+        elif scene.TLM_EngineProperties.tlm_lighting_mode == "shadow":
+            print("Baking combined: Shadow")
+            bpy.ops.object.bake(type="SHADOW", margin=scene.TLM_EngineProperties.tlm_dilation_margin, use_clear=False)
         elif scene.TLM_EngineProperties.tlm_lighting_mode == "combinedao":
 
             if bpy.app.driver_namespace["tlm_plus_mode"] == 1:

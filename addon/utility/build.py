@@ -59,6 +59,8 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
         bpy.app.driver_namespace["tlm_baking_type"] = "DIFFUSE"
     elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "ao":
         bpy.app.driver_namespace["tlm_baking_type"] = "AO"
+    elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "shadow":
+        bpy.app.driver_namespace["tlm_baking_type"] = "Shadow"
     elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "combined":
         bpy.app.driver_namespace["tlm_baking_type"] = "COMBINED"
     elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "complete":
@@ -109,7 +111,7 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
             os.mkdir(dirpath)
 
         #Naming check
-        naming_check()
+        naming_check(self)
 
         if sceneProperties.tlm_lightmap_engine == "Cycles":
 
@@ -165,7 +167,7 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
             os.mkdir(dirpath)
 
         #Naming check
-        naming_check()
+        naming_check(self)
 
         if scene.TLM_SceneProperties.tlm_network_render:
 
@@ -314,7 +316,7 @@ def begin_build(self):
     if sceneProperties.tlm_lightmap_engine == "Cycles":
 
         try:
-            lightmap.bake()
+            lightmap.bake(self)
         except Exception as e:
 
             print("An error occured during lightmap baking. See the line below for more detail:")
@@ -1166,49 +1168,49 @@ def reset_settings(prev_settings):
     #for obj in prev_settings[12]:
     #    obj.select_set(True)
 
-def naming_check():
+def naming_check(tlm):
 
-    for obj in bpy.context.scene.objects:
-        if obj.type == 'MESH' and obj.name in bpy.context.view_layer.objects:
+    for obj_id in tlm.objectids_to_process:
+        obj = bpy.context.scene.objects[obj_id]
+        if obj.name != "":
+            if "_" in obj.name:
+                obj.name = obj.name.replace("_",".")
+            if " " in obj.name:
+                obj.name = obj.name.replace(" ",".")
+            if "[" in obj.name:
+                obj.name = obj.name.replace("[",".")
+            if "]" in obj.name:
+                obj.name = obj.name.replace("]",".")
+            if "ø" in obj.name:
+                obj.name = obj.name.replace("ø","oe")
+            if "æ" in obj.name:
+                obj.name = obj.name.replace("æ","ae")
+            if "å" in obj.name:
+                obj.name = obj.name.replace("å","aa")
+            if "/" in obj.name:
+                obj.name = obj.name.replace("/",".")
+            if ":" in obj.name:
+                obj.name = obj.name.replace(":", ".")
 
-            if obj.TLM_ObjectProperties.tlm_mesh_lightmap_use:
-
-                if obj.name != "":
-
-                    if "_" in obj.name:
-                        obj.name = obj.name.replace("_",".")
-                    if " " in obj.name:
-                        obj.name = obj.name.replace(" ",".")
-                    if "[" in obj.name:
-                        obj.name = obj.name.replace("[",".")
-                    if "]" in obj.name:
-                        obj.name = obj.name.replace("]",".")
-                    if "ø" in obj.name:
-                        obj.name = obj.name.replace("ø","oe")
-                    if "æ" in obj.name:
-                        obj.name = obj.name.replace("æ","ae")
-                    if "å" in obj.name:
-                        obj.name = obj.name.replace("å","aa")
-                    if "/" in obj.name:
-                        obj.name = obj.name.replace("/",".")
-
-                    for slot in obj.material_slots:
-                        if "_" in slot.material.name:
-                            slot.material.name = slot.material.name.replace("_",".")
-                        if " " in slot.material.name:
-                            slot.material.name = slot.material.name.replace(" ",".")
-                        if "[" in slot.material.name:
-                            slot.material.name = slot.material.name.replace("[",".")
-                        if "[" in slot.material.name:
-                            slot.material.name = slot.material.name.replace("]",".")
-                        if "ø" in slot.material.name:
-                            slot.material.name = slot.material.name.replace("ø","oe")
-                        if "æ" in slot.material.name:
-                            slot.material.name = slot.material.name.replace("æ","ae")
-                        if "å" in slot.material.name:
-                            slot.material.name = slot.material.name.replace("å","aa")
-                        if "/" in slot.material.name:
-                            slot.material.name = slot.material.name.replace("/",".")
+            for slot in obj.material_slots:
+                if "_" in slot.material.name:
+                    slot.material.name = slot.material.name.replace("_",".")
+                if " " in slot.material.name:
+                    slot.material.name = slot.material.name.replace(" ",".")
+                if "[" in slot.material.name:
+                    slot.material.name = slot.material.name.replace("[",".")
+                if "[" in slot.material.name:
+                    slot.material.name = slot.material.name.replace("]",".")
+                if "ø" in slot.material.name:
+                    slot.material.name = slot.material.name.replace("ø","oe")
+                if "æ" in slot.material.name:
+                    slot.material.name = slot.material.name.replace("æ","ae")
+                if "å" in slot.material.name:
+                    slot.material.name = slot.material.name.replace("å","aa")
+                if "/" in slot.material.name:
+                    slot.material.name = slot.material.name.replace("/",".")
+                if ":" in slot.material.name:
+                    slot.material.name = slot.material.name.replace(":", ".")              
 
 def opencv_check():
 
@@ -1381,6 +1383,8 @@ def write_light_map_to_object():
         if len(filename_components) > 2:
             if filename_components[2] == "AO":
                 lmInfo.bakingMode = "AO"
+            if filename_components[2] == "Shadow":
+                lmInfo.bakingMode = "Shadow"
             elif filename_components[2] == "DIFFUSE":
                 lmInfo.bakingMode = "Indirect"
             elif filename_components[2] == "COMBINED":
