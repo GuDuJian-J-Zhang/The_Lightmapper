@@ -290,16 +290,20 @@ def configure_meshes(self):
                 uv_channel = obj.TLM_ObjectProperties.tlm_uv_channel
             else:
                 uv_channel = "UVMap_Lightmap"
-
             if not uv_channel in uv_layers:
                 if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
                     print("UV map created for obj: " + obj.name)
                 if len(uv_layers) == 0:
-                    uvmap = uv_layers.new(name=uv_channel + "001")
-                elif len(uv_layers) > 1:
-                    while len(uv_layers) > 1:
+                    uv_layers.new(name=uv_channel + "001")
+                    uv_layers.new(name=uv_channel)
+                elif len(uv_layers) == 1:
+                    uv_layers.new(name=uv_channel)
+                elif len(uv_layers) >= 2:
+                    while len(uv_layers) > 2:
                         uv_layers.remove(uv_layers[len(uv_layers) - 1])
-                uvmap = uv_layers.new(name=uv_channel)
+                    uv_layers.new(name=uv_channel)
+                    uv_textures = obj.data.uv_layers
+                    uv_textures.remove(uv_textures[1])
                 uv_layers.active_index = len(uv_layers) - 1
 
                 #If lightmap
