@@ -321,6 +321,25 @@ class TLM_SceneProperties(bpy.types.PropertyGroup):
                 name = "Unwrap Mode", 
                 description="TODO", 
                 default='SmartProject')
+    
+    tlm_use_uv_packer : BoolProperty(
+        name="Use UV Packer", 
+        description="UV Packer will be utilized after initial UV mapping for optimized packing.", 
+        default=False)
+
+    tlm_uv_packer_padding : FloatProperty(
+        name="Padding", 
+        default=2.0, 
+        min=0.0, 
+        max=100.0, 
+        subtype='FACTOR')
+
+    tlm_uv_packer_packing_engine : EnumProperty(
+        items = [('OP0', 'Efficient', 'Best compromise for speed and space usage.'),
+                ('OP1', 'High Quality', 'Slowest, but maximum space usage.')],
+                name = "Packing Engine", 
+                description="Which UV Packer engine to use.", 
+                default='OP0')
 
     tlm_postpack_object : BoolProperty( #CHECK INSTEAD OF ATLASGROUPB
         name="Postpack object", 

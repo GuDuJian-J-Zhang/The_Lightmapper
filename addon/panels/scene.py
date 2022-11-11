@@ -464,6 +464,17 @@ class TLM_PT_Utility(bpy.types.Panel):
                     row = layout.row()
                     row.prop(sceneProperties, "tlm_resolution_max")
 
+                #If UV Packer installed
+                if "UV-Packer" in bpy.context.preferences.addons.keys():
+                    row = layout.row()
+                    row.prop(sceneProperties, "tlm_use_uv_packer")
+                    if sceneProperties.tlm_use_uv_packer:
+                        row = layout.row(align=True)
+                        row.prop(sceneProperties, "tlm_uv_packer_padding")
+                        row = layout.row(align=True)
+                        row.prop(sceneProperties, "tlm_uv_packer_packing_engine")
+                        row = layout.row()
+
             row = layout.row()
             row.operator("tlm.disable_selection")
             row = layout.row(align=True)

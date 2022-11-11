@@ -293,6 +293,9 @@ class TLM_EnableSet(bpy.types.Operator):
                     obj.TLM_ObjectProperties.tlm_mesh_lightmap_unwrap_mode = bpy.context.scene.TLM_SceneProperties.tlm_mesh_lightmap_unwrap_mode
                     obj.TLM_ObjectProperties.tlm_mesh_unwrap_margin = bpy.context.scene.TLM_SceneProperties.tlm_mesh_unwrap_margin
                     obj.TLM_ObjectProperties.tlm_postpack_object = bpy.context.scene.TLM_SceneProperties.tlm_postpack_object
+                    obj.TLM_ObjectProperties.tlm_use_uv_packer = bpy.context.scene.TLM_SceneProperties.tlm_use_uv_packer
+                    obj.TLM_ObjectProperties.tlm_uv_packer_padding = bpy.context.scene.TLM_SceneProperties.tlm_uv_packer_padding
+                    obj.TLM_ObjectProperties.tlm_uv_packer_packing_engine = bpy.context.scene.TLM_SceneProperties.tlm_uv_packer_packing_engine
 
                     if obj.TLM_ObjectProperties.tlm_mesh_lightmap_unwrap_mode == "AtlasGroupA":
                         obj.TLM_ObjectProperties.tlm_atlas_pointer = bpy.context.scene.TLM_SceneProperties.tlm_atlas_pointer
@@ -337,6 +340,9 @@ class TLM_EnableSet(bpy.types.Operator):
                     obj.TLM_ObjectProperties.tlm_mesh_lightmap_unwrap_mode = bpy.context.scene.TLM_SceneProperties.tlm_mesh_lightmap_unwrap_mode
                     obj.TLM_ObjectProperties.tlm_mesh_unwrap_margin = bpy.context.scene.TLM_SceneProperties.tlm_mesh_unwrap_margin
                     obj.TLM_ObjectProperties.tlm_postpack_object = bpy.context.scene.TLM_SceneProperties.tlm_postpack_object
+                    obj.TLM_ObjectProperties.tlm_use_uv_packer = bpy.context.scene.TLM_SceneProperties.tlm_use_uv_packer
+                    obj.TLM_ObjectProperties.tlm_uv_packer_padding = bpy.context.scene.TLM_SceneProperties.tlm_uv_packer_padding
+                    obj.TLM_ObjectProperties.tlm_uv_packer_packing_engine = bpy.context.scene.TLM_SceneProperties.tlm_uv_packer_packing_engine
 
                     if obj.TLM_ObjectProperties.tlm_mesh_lightmap_unwrap_mode == "AtlasGroupA":
                         obj.TLM_ObjectProperties.tlm_atlas_pointer = bpy.context.scene.TLM_SceneProperties.tlm_atlas_pointer
@@ -382,6 +388,9 @@ class TLM_EnableSet(bpy.types.Operator):
                         obj.TLM_ObjectProperties.tlm_mesh_lightmap_unwrap_mode = bpy.context.scene.TLM_SceneProperties.tlm_mesh_lightmap_unwrap_mode
                         obj.TLM_ObjectProperties.tlm_mesh_unwrap_margin = bpy.context.scene.TLM_SceneProperties.tlm_mesh_unwrap_margin
                         obj.TLM_ObjectProperties.tlm_postpack_object = bpy.context.scene.TLM_SceneProperties.tlm_postpack_object
+                        obj.TLM_ObjectProperties.tlm_use_uv_packer = bpy.context.scene.TLM_SceneProperties.tlm_use_uv_packer
+                        obj.TLM_ObjectProperties.tlm_uv_packer_padding = bpy.context.scene.TLM_SceneProperties.tlm_uv_packer_padding
+                        obj.TLM_ObjectProperties.tlm_uv_packer_packing_engine = bpy.context.scene.TLM_SceneProperties.tlm_uv_packer_packing_engine
 
                         if obj.TLM_ObjectProperties.tlm_mesh_lightmap_unwrap_mode == "AtlasGroupA":
                             obj.TLM_ObjectProperties.tlm_atlas_pointer = bpy.context.scene.TLM_SceneProperties.tlm_atlas_pointer
