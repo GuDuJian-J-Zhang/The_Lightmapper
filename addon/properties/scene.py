@@ -316,6 +316,7 @@ class TLM_SceneProperties(bpy.types.PropertyGroup):
         items = [('Lightmap', 'Lightmap', 'TODO'),
                  ('SmartProject', 'Smart Project', 'TODO'),
                  ('AtlasGroupA', 'Atlas Group (Prepack)', 'Attaches the object to a prepack Atlas group. Will overwrite UV map on build.'),
+                 ('Copy', 'Copy existing', 'Use the existing UV channel'),
                  ('Xatlas', 'Xatlas', 'TODO')],
                 name = "Unwrap Mode", 
                 description="TODO", 

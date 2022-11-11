@@ -285,6 +285,7 @@ class TLM_EnableSet(bpy.types.Operator):
                     
                     bpy.context.view_layer.objects.active = obj
                     obj.select_set(True)
+                    bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=True)
                     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
                     
                     obj.TLM_ObjectProperties.tlm_mesh_lightmap_use = True
@@ -328,6 +329,7 @@ class TLM_EnableSet(bpy.types.Operator):
                     
                     bpy.context.view_layer.objects.active = obj
                     obj.select_set(True)
+                    bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=True)
                     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
                     
                     obj.TLM_ObjectProperties.tlm_mesh_lightmap_use = True
@@ -372,6 +374,7 @@ class TLM_EnableSet(bpy.types.Operator):
                         
                         bpy.context.view_layer.objects.active = obj
                         obj.select_set(True)
+                        bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=True)
                         bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
                         
                         obj.TLM_ObjectProperties.tlm_mesh_lightmap_use = True

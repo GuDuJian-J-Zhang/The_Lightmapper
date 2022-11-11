@@ -352,7 +352,7 @@ def Unwrap_Lightmap_Group_Xatlas_2_headless_call(obj):
     #make sure all the objects have ligthmap uvs
     for obj in selected_objects:
         if obj.type == 'MESH':
-            safe_name = gen_safe_name();
+            safe_name = gen_safe_name()
             rename_dict[obj.name] = (obj.name,safe_name)
             safe_dict[safe_name] = obj.name
             context.view_layer.objects.active = obj
