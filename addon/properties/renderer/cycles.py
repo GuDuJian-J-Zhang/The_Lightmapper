@@ -102,6 +102,7 @@ class TLM_CyclesSceneProperties(bpy.types.PropertyGroup):
         items = [('combined', 'Combined', 'Bake combined lighting'),
                 ('combinedao', 'Combined+AO', 'Bake combined lighting with Ambient Occlusion'),
                 ('indirect', 'Indirect', 'Bake indirect lighting'),
+                ('diffuse', 'Diffuse', 'Bake diffuse lighting'),
                 ('indirectao', 'Indirect+AO', 'Bake indirect lighting with Ambient Occlusion'),
                 ('ao', 'AO', 'Bake only Ambient Occlusion'),
                 ('shadow', 'Shadow', 'Bake only Shadow'),

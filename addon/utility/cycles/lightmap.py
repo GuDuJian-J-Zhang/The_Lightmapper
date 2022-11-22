@@ -57,6 +57,9 @@ def bake(self, plus_pass=0):
         elif scene.TLM_EngineProperties.tlm_lighting_mode == "indirect":
             print("Baking combined: Indirect")
             bpy.ops.object.bake(type="DIFFUSE", pass_filter={"INDIRECT"}, margin=scene.TLM_EngineProperties.tlm_dilation_margin, use_clear=False)
+        elif scene.TLM_EngineProperties.tlm_lighting_mode == "diffuse":
+            print("Baking combined: Diffuse")
+            bpy.ops.object.bake(type="DIFFUSE", margin=scene.TLM_EngineProperties.tlm_dilation_margin, use_clear=False)
         elif scene.TLM_EngineProperties.tlm_lighting_mode == "ao":
             print("Baking combined: AO")
             bpy.ops.object.bake(type="AO", margin=scene.TLM_EngineProperties.tlm_dilation_margin, use_clear=False)

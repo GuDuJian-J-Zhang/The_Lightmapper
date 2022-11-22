@@ -68,6 +68,8 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
            bpy.app.driver_namespace["tlm_baking_type"] = "AO" 
 
     elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "indirect":
+        bpy.app.driver_namespace["tlm_baking_type"] = "DIFFUSE_INDIRECT"
+    elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "diffuse":
         bpy.app.driver_namespace["tlm_baking_type"] = "DIFFUSE"
     elif bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode == "ao":
         bpy.app.driver_namespace["tlm_baking_type"] = "AO"

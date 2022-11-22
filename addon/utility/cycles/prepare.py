@@ -343,198 +343,198 @@ def configure_meshes(self):
                     if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
                         print("Copied Existing UV Map for object: " + obj.name)
 
-                if obj.TLM_ObjectProperties.tlm_use_uv_packer:
-                    bpy.ops.object.select_all(action='DESELECT')
-                    obj.select_set(True)
-                    bpy.context.view_layer.objects.active = obj
-                    bpy.ops.object.mode_set(mode='EDIT')
-                    bpy.ops.mesh.select_all(action='SELECT')
+            if obj.TLM_ObjectProperties.tlm_use_uv_packer:
+                bpy.ops.object.select_all(action='DESELECT')
+                obj.select_set(True)
+                bpy.context.view_layer.objects.active = obj
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.select_all(action='SELECT')
 
-                    bpy.context.scene.UVPackerProps.uvp_padding = obj.TLM_ObjectProperties.tlm_uv_packer_padding
-                    bpy.context.scene.UVPackerProps.uvp_engine = obj.TLM_ObjectProperties.tlm_uv_packer_packing_engine
-
-                    #print(x)
-
-                    print("!!!!!!!!!!!!!!!!!!!!! Using UV Packer on: " + obj.name)
-
-                    if uv_layers.active == "UVMap_Lightmap":
-                        print("YES")
-                    else:
-                        print("NO")
-                        uv_layers.active_index = len(uv_layers) - 1
-
-                    if uv_layers.active == "UVMap_Lightmap":
-                        print("YES")
-                    else:
-                        print("NO")
-                        uv_layers.active_index = len(uv_layers) - 1
-
-                    bpy.ops.uvpackeroperator.packbtn()
-
-                    if bpy.context.scene.UVPackerProps.uvp_engine == "OP0":
-                        time.sleep(1)
-                    else:
-                        time.sleep(2)
-
-                    #FIX THIS! MAKE A SEPARATE CALL. THIS IS A THREADED ASYNC
-
-                    bpy.ops.mesh.select_all(action='DESELECT')
-                    bpy.ops.object.mode_set(mode='OBJECT')
-
-                    #print(x)
-
-                else:
-                    if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                        print("Existing UV map found for obj: " + obj.name)
-                    for i in range(0, len(uv_layers)):
-                        if uv_layers[i].name == uv_channel:
-                            uv_layers.active_index = i
-                            break
+                bpy.context.scene.UVPackerProps.uvp_padding = obj.TLM_ObjectProperties.tlm_uv_packer_padding
+                bpy.context.scene.UVPackerProps.uvp_engine = obj.TLM_ObjectProperties.tlm_uv_packer_packing_engine
 
                 #print(x)
 
-                #Sort out nodes
-                for slot in obj.material_slots:
+                print("!!!!!!!!!!!!!!!!!!!!! Using UV Packer on: " + obj.name)
 
-                    nodetree = slot.material.node_tree
+                if uv_layers.active == "UVMap_Lightmap":
+                    print("YES")
+                else:
+                    print("NO")
+                    uv_layers.active_index = len(uv_layers) - 1
 
-                    outputNode = nodetree.nodes[0] #Presumed to be material output node
+                if uv_layers.active == "UVMap_Lightmap":
+                    print("YES")
+                else:
+                    print("NO")
+                    uv_layers.active_index = len(uv_layers) - 1
 
-                    if(outputNode.type != "OUTPUT_MATERIAL"):
-                        for node in nodetree.nodes:
-                            if node.type == "OUTPUT_MATERIAL":
-                                outputNode = node
-                                break
+                bpy.ops.uvpackeroperator.packbtn()
 
-                    mainNode = outputNode.inputs[0].links[0].from_node
+                if bpy.context.scene.UVPackerProps.uvp_engine == "OP0":
+                    time.sleep(1)
+                else:
+                    time.sleep(2)
 
-                    if mainNode.type not in ['BSDF_PRINCIPLED','BSDF_DIFFUSE','GROUP']:
+                #FIX THIS! MAKE A SEPARATE CALL. THIS IS A THREADED ASYNC
 
-                        #TODO! FIND THE PRINCIPLED PBR
-                        self.report({'INFO'}, "The primary material node is not supported. Seeking first principled.")
+                bpy.ops.mesh.select_all(action='DESELECT')
+                bpy.ops.object.mode_set(mode='OBJECT')
 
-                        if len(find_node_by_type(nodetree.nodes, Node_Types.pbr_node)) > 0: 
-                            mainNode = find_node_by_type(nodetree.nodes, Node_Types.pbr_node)[0]
-                        else:
-                            self.report({'INFO'}, "No principled found. Seeking diffuse")
-                            if len(find_node_by_type(nodetree.nodes, Node_Types.diffuse)) > 0: 
-                                mainNode = find_node_by_type(nodetree.nodes, Node_Types.diffuse)[0]
-                            else:
-                                self.report({'INFO'}, "No supported nodes. Continuing anyway.")
+                #print(x)
 
-                    if mainNode.type == 'GROUP':
-                        if mainNode.node_tree != "Armory PBR":
-                            if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                                print("The material group is not supported!")
+            else:
+                if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
+                    print("Existing UV map found for obj: " + obj.name)
+                for i in range(0, len(uv_layers)):
+                    if uv_layers[i].name == uv_channel:
+                        uv_layers.active_index = i
+                        break
 
-                    if (mainNode.type == "ShaderNodeMixRGB"):
+                #print(x)
+
+        #Sort out nodes
+        for slot in obj.material_slots:
+
+            nodetree = slot.material.node_tree
+
+            outputNode = nodetree.nodes[0] #Presumed to be material output node
+
+            if(outputNode.type != "OUTPUT_MATERIAL"):
+                for node in nodetree.nodes:
+                    if node.type == "OUTPUT_MATERIAL":
+                        outputNode = node
+                        break
+
+            mainNode = outputNode.inputs[0].links[0].from_node
+
+            if mainNode.type not in ['BSDF_PRINCIPLED','BSDF_DIFFUSE','GROUP']:
+
+                #TODO! FIND THE PRINCIPLED PBR
+                self.report({'INFO'}, "The primary material node is not supported. Seeking first principled.")
+
+                if len(find_node_by_type(nodetree.nodes, Node_Types.pbr_node)) > 0: 
+                    mainNode = find_node_by_type(nodetree.nodes, Node_Types.pbr_node)[0]
+                else:
+                    self.report({'INFO'}, "No principled found. Seeking diffuse")
+                    if len(find_node_by_type(nodetree.nodes, Node_Types.diffuse)) > 0: 
+                        mainNode = find_node_by_type(nodetree.nodes, Node_Types.diffuse)[0]
+                    else:
+                        self.report({'INFO'}, "No supported nodes. Continuing anyway.")
+
+            if mainNode.type == 'GROUP':
+                if mainNode.node_tree != "Armory PBR":
+                    if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
+                        print("The material group is not supported!")
+
+            if (mainNode.type == "ShaderNodeMixRGB"):
+                if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
+                    print("Mix shader found")
+
+                #Skip for now
+                slot.material.TLM_ignore = True
+
+            if (mainNode.type == "BSDF_PRINCIPLED"):
+                if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
+                    print("BSDF_Principled")
+                if scene.TLM_EngineProperties.tlm_directional_mode == "None":
+                    if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
+                        print("Directional mode")
+                    if not len(mainNode.inputs[22].links) == 0:
                         if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                            print("Mix shader found")
+                            print("NOT LEN 0")
+                        ninput = mainNode.inputs[22].links[0]
+                        noutput = mainNode.inputs[22].links[0].from_node
+                        nodetree.links.remove(noutput.outputs[0].links[0])
 
-                        #Skip for now
-                        slot.material.TLM_ignore = True
+                #Clamp metallic
+                if bpy.context.scene.TLM_SceneProperties.tlm_metallic_clamp == "limit":
 
-                    if (mainNode.type == "BSDF_PRINCIPLED"):
-                        if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                            print("BSDF_Principled")
-                        if scene.TLM_EngineProperties.tlm_directional_mode == "None":
-                            if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                                print("Directional mode")
-                            if not len(mainNode.inputs[22].links) == 0:
-                                if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                                    print("NOT LEN 0")
-                                ninput = mainNode.inputs[22].links[0]
-                                noutput = mainNode.inputs[22].links[0].from_node
-                                nodetree.links.remove(noutput.outputs[0].links[0])
+                    MainMetNodeSocket = mainNode.inputs.get("Metallic")
+                    if not len(MainMetNodeSocket.links) == 0:
 
-                        #Clamp metallic
-                        if bpy.context.scene.TLM_SceneProperties.tlm_metallic_clamp == "limit":
+                        print("Creating new clamp node")
 
-                            MainMetNodeSocket = mainNode.inputs.get("Metallic")
-                            if not len(MainMetNodeSocket.links) == 0:
+                        nodes = nodetree.nodes
+                        MetClampNode = nodes.new('ShaderNodeClamp')
+                        MetClampNode.location = (-200,150)
+                        MetClampNode.inputs[2].default_value = 0.9
+                        minput = mainNode.inputs.get("Metallic").links[0] #Metal input socket
+                        moutput = mainNode.inputs.get("Metallic").links[0].from_socket #Output socket
+                        
+                        nodetree.links.remove(minput)
 
-                                print("Creating new clamp node")
+                        nodetree.links.new(moutput, MetClampNode.inputs[0]) #minput node to clamp node
+                        nodetree.links.new(MetClampNode.outputs[0], MainMetNodeSocket) #clamp node to metinput
 
-                                nodes = nodetree.nodes
-                                MetClampNode = nodes.new('ShaderNodeClamp')
-                                MetClampNode.location = (-200,150)
-                                MetClampNode.inputs[2].default_value = 0.9
-                                minput = mainNode.inputs.get("Metallic").links[0] #Metal input socket
-                                moutput = mainNode.inputs.get("Metallic").links[0].from_socket #Output socket
-                                
-                                nodetree.links.remove(minput)
+                    elif mainNode.type == "PRINCIPLED_BSDF" and MainMetNodeSocket.links[0].from_node.type == "CLAMP":
 
-                                nodetree.links.new(moutput, MetClampNode.inputs[0]) #minput node to clamp node
-                                nodetree.links.new(MetClampNode.outputs[0], MainMetNodeSocket) #clamp node to metinput
+                        pass
 
-                            elif mainNode.type == "PRINCIPLED_BSDF" and MainMetNodeSocket.links[0].from_node.type == "CLAMP":
+                    else:
 
-                                pass
+                        print("New clamp node NOT made")
 
-                            else:
+                        if mainNode.inputs[4].default_value > 0.9:
+                            mainNode.inputs[4].default_value = 0.9
 
-                                print("New clamp node NOT made")
+                elif bpy.context.scene.TLM_SceneProperties.tlm_metallic_clamp == "zero":
 
-                                if mainNode.inputs[4].default_value > 0.9:
-                                    mainNode.inputs[4].default_value = 0.9
+                    MainMetNodeSocket = mainNode.inputs[4]
+                    if not len(MainMetNodeSocket.links) == 0:
+                        nodes = nodetree.nodes
+                        MetClampNode = nodes.new('ShaderNodeClamp')
+                        MetClampNode.location = (-200,150)
+                        MetClampNode.inputs[2].default_value = 0.0
+                        minput = mainNode.inputs[4].links[0] #Metal input socket
+                        moutput = mainNode.inputs[4].links[0].from_socket #Output socket
 
-                        elif bpy.context.scene.TLM_SceneProperties.tlm_metallic_clamp == "zero":
+                        nodetree.links.remove(minput)
 
-                            MainMetNodeSocket = mainNode.inputs[4]
-                            if not len(MainMetNodeSocket.links) == 0:
-                                nodes = nodetree.nodes
-                                MetClampNode = nodes.new('ShaderNodeClamp')
-                                MetClampNode.location = (-200,150)
-                                MetClampNode.inputs[2].default_value = 0.0
-                                minput = mainNode.inputs[4].links[0] #Metal input socket
-                                moutput = mainNode.inputs[4].links[0].from_socket #Output socket
+                        nodetree.links.new(moutput, MetClampNode.inputs[0]) #minput node to clamp node
+                        nodetree.links.new(MetClampNode.outputs[0], MainMetNodeSocket) #clamp node to metinput
+                    else:
+                        mainNode.inputs[4].default_value = 0.0
 
-                                nodetree.links.remove(minput)
+                else: #Skip
+                    pass
 
-                                nodetree.links.new(moutput, MetClampNode.inputs[0]) #minput node to clamp node
-                                nodetree.links.new(MetClampNode.outputs[0], MainMetNodeSocket) #clamp node to metinput
-                            else:
-                                mainNode.inputs[4].default_value = 0.0
+            if (mainNode.type == "BSDF_DIFFUSE"):
+                if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
+                    print("BSDF_Diffuse")
 
-                        else: #Skip
-                            pass
+            # if (mainNode.type == "BSDF_DIFFUSE"):
+            #     if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
+            #         print("BSDF_Diffuse")
 
-                    if (mainNode.type == "BSDF_DIFFUSE"):
-                        if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                            print("BSDF_Diffuse")
+        #TODO FIX THIS PART!
+        #THIS IS USED IN CASES WHERE FOR SOME REASON THE USER FORGETS TO CONNECT SOMETHING INTO THE OUTPUT MATERIAL
+        for slot in obj.material_slots:
 
-                    # if (mainNode.type == "BSDF_DIFFUSE"):
-                    #     if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                    #         print("BSDF_Diffuse")
+            nodetree = bpy.data.materials[slot.name].node_tree
+            nodes = nodetree.nodes
 
-                #TODO FIX THIS PART!
-                #THIS IS USED IN CASES WHERE FOR SOME REASON THE USER FORGETS TO CONNECT SOMETHING INTO THE OUTPUT MATERIAL
-                for slot in obj.material_slots:
+            #First search to get the first output material type
+            for node in nodetree.nodes:
+                if node.type == "OUTPUT_MATERIAL":
+                    mainNode = node
+                    break
 
-                    nodetree = bpy.data.materials[slot.name].node_tree
-                    nodes = nodetree.nodes
+            #Fallback to get search
+            if not mainNode.type == "OUTPUT_MATERIAL":
+                mainNode = nodetree.nodes.get("Material Output")
 
-                    #First search to get the first output material type
-                    for node in nodetree.nodes:
-                        if node.type == "OUTPUT_MATERIAL":
-                            mainNode = node
-                            break
+            #Last resort to first node in list
+            if not mainNode.type == "OUTPUT_MATERIAL":
+                mainNode = nodetree.nodes[0].inputs[0].links[0].from_node
 
-                    #Fallback to get search
-                    if not mainNode.type == "OUTPUT_MATERIAL":
-                        mainNode = nodetree.nodes.get("Material Output")
+        #     for node in nodes:
+        #         if "LM" in node.name:
+        #             nodetree.links.new(node.outputs[0], mainNode.inputs[0])
 
-                    #Last resort to first node in list
-                    if not mainNode.type == "OUTPUT_MATERIAL":
-                        mainNode = nodetree.nodes[0].inputs[0].links[0].from_node
-
-                #     for node in nodes:
-                #         if "LM" in node.name:
-                #             nodetree.links.new(node.outputs[0], mainNode.inputs[0])
-
-                #     for node in nodes:
-                #         if "Lightmap" in node.name:
-                #                 nodes.remove(node)
+        #     for node in nodes:
+        #         if "Lightmap" in node.name:
+        #                 nodes.remove(node)
 
 def preprocess_material(obj, scene):
     if len(obj.material_slots) == 0:
