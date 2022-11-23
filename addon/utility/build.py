@@ -18,7 +18,7 @@ previous_settings = {}
 postprocess_shutdown = False
 logging = True
 
-def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
+def prepare_build(objectids_to_process=[], background_mode=False, shutdown_after_build=False):
 
     global tlm_log
     tlm_log = log.TLM_Logman()
@@ -43,7 +43,7 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
                 if obj_name not in obj_name_to_file_name_list:
                     obj_name_to_file_name_list[obj_name] = []
                 obj_name_to_file_name_list[obj_name].append(file)
-        for obj_id in self.objectids_to_process:
+        for obj_id in objectids_to_process:
             obj = bpy.context.scene.objects[obj_id]
             if obj.name in obj_name_to_file_name_list:
                 for file in obj_name_to_file_name_list[obj.name]:
@@ -95,26 +95,26 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
 
         if check_save():
             print("Please save your file first")
-            self.report({'INFO'}, "Please save your file first")
+            #self.report({'INFO'}, "Please save your file first")
             setGui(0)
             return{'FINISHED'}
 
         if check_denoiser():
             print("No denoise OIDN path assigned")
-            self.report({'INFO'}, "No denoise OIDN path assigned. Check that it points to the correct executable.")
+            #self.report({'INFO'}, "No denoise OIDN path assigned. Check that it points to the correct executable.")
             setGui(0)
             return{'FINISHED'}
 
         if check_materials():
             print("Error with material")
-            self.report({'INFO'}, "Error with material")
+            #self.report({'INFO'}, "Error with material")
             setGui(0)
             return{'FINISHED'}
 
         if opencv_check():
             if sceneProperties.tlm_filtering_use:
                 print("Error:Filtering - OpenCV not installed")
-                self.report({'INFO'}, "Error:Filtering - OpenCV not installed")
+                #self.report({'INFO'}, "Error:Filtering - OpenCV not installed")
                 setGui(0)
                 return{'FINISHED'}
 
@@ -125,21 +125,21 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
             os.mkdir(dirpath)
 
         #Naming check
-        naming_check(self)
+        naming_check(objectids_to_process)
 
         if sceneProperties.tlm_lightmap_engine == "Cycles":
 
-            prepare.init(self, previous_settings)
+            prepare.init(objectids_to_process, previous_settings)
 
         if sceneProperties.tlm_lightmap_engine == "LuxCoreRender":
 
-            setup.init(self, previous_settings)
+            setup.init(objectids_to_process, previous_settings)
 
         if sceneProperties.tlm_lightmap_engine == "OctaneRender":
 
-            configure.init(self, previous_settings)
+            configure.init(objectids_to_process, previous_settings)
 
-        begin_build(self)
+        begin_build(objectids_to_process)
 
     else:
 
@@ -157,23 +157,23 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
         #Timer start here bound to global
         if check_save():
             print("Please save your file first")
-            self.report({'INFO'}, "Please save your file first")
+            #self.report({'INFO'}, "Please save your file first")
             return{'FINISHED'}
 
         if check_denoiser():
             print("No denoise OIDN path assigned")
-            self.report({'INFO'}, "No denoise OIDN path assigned")
+            #self.report({'INFO'}, "No denoise OIDN path assigned")
             return{'FINISHED'}
 
         if check_materials():
             print("Error with material")
-            self.report({'INFO'}, "Error with material")
+            #self.report({'INFO'}, "Error with material")
             return{'FINISHED'}
 
         if opencv_check():
             if sceneProperties.tlm_filtering_use:
                 print("Error:Filtering - OpenCV not installed")
-                self.report({'INFO'}, "Error:Filtering - OpenCV not installed")
+                #self.report({'INFO'}, "Error:Filtering - OpenCV not installed")
                 return{'FINISHED'}
 
         dirpath = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
@@ -181,7 +181,7 @@ def prepare_build(self=0, background_mode=False, shutdown_after_build=False):
             os.mkdir(dirpath)
 
         #Naming check
-        naming_check(self)
+        naming_check(objectids_to_process)
 
         if scene.TLM_SceneProperties.tlm_network_render:
 
@@ -318,7 +318,7 @@ def finish_assemble(self=0, background_pass=0, load_atlas=0):
     else:
         manage_build(False, load_atlas)
 
-def begin_build(self):
+def begin_build(objectids_to_process):
 
     print("Beginning build")
 
@@ -330,7 +330,7 @@ def begin_build(self):
     if sceneProperties.tlm_lightmap_engine == "Cycles":
 
         try:
-            lightmap.bake(self)
+            lightmap.bake(objectids_to_process)
         except Exception as e:
 
             print("An error occured during lightmap baking. See the line below for more detail:")
@@ -729,9 +729,9 @@ def begin_build(self):
                         img = bpy.data.images.load(os.path.join(dirpath,file))
                         img.save_render(img.filepath_raw[:-4] + ".png")
 
-    manage_build(self)
+    manage_build(objectids_to_process)
 
-def manage_build(self, background_pass=False, load_atlas=0):
+def manage_build(objectids_to_process, background_pass=False, load_atlas=0):
 
     print("Managing build")
 
@@ -1041,7 +1041,7 @@ def manage_build(self, background_pass=False, load_atlas=0):
 
                 bpy.app.driver_namespace["tlm_plus_mode"] = 2
 
-                prepare_build(self, background_mode=False, shutdown_after_build=False)
+                prepare_build(objectids_to_process, background_mode=False, shutdown_after_build=False)
 
                 if not background_pass and bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode != "combinedao":
                     #pass
@@ -1182,9 +1182,9 @@ def reset_settings(prev_settings):
     #for obj in prev_settings[12]:
     #    obj.select_set(True)
 
-def naming_check(tlm):
+def naming_check(objectids_to_process):
 
-    for obj_id in tlm.objectids_to_process:
+    for obj_id in objectids_to_process:
         obj = bpy.context.scene.objects[obj_id]
         if obj.name != "":
             if "_" in obj.name:

@@ -51,7 +51,7 @@ class TLM_BuildLightmaps(bpy.types.Operator):
 
         if not bpy.app.background:
             self.init_objectids_to_process()
-            build.prepare_build(self, False)
+            build.prepare_build(self.objectids_to_process, False)
             build.write_light_map_to_object()
 
         else:

@@ -2,7 +2,7 @@ import bpy, os
 from .. import build
 from time import time, sleep
 
-def bake(self, plus_pass=0):
+def bake(objectids_to_process, plus_pass=0):
 
     if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
         print("Initializing lightmap baking.")
@@ -13,11 +13,11 @@ def bake(self, plus_pass=0):
 
     currentIterNum = 0
 
-    iterNum = len(self.objectids_to_process)
+    iterNum = len(objectids_to_process)
     if iterNum > 1:
         iterNum = iterNum - 1
 
-    for id in self.objectids_to_process:
+    for id in objectids_to_process:
         obj = bpy.context.scene.objects[id]
 
         scene = bpy.context.scene

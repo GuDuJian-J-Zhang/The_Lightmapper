@@ -11,7 +11,7 @@ def assemble():
 
     configure_meshes()
 
-def init(self, prev_container):
+def init(objectids_to_process, prev_container):
 
     store_existing(prev_container)
 
@@ -21,7 +21,7 @@ def init(self, prev_container):
 
     configure_lights()
 
-    configure_meshes(self)
+    configure_meshes(objectids_to_process)
 
     print("Config mesh catch omitted: REMEMBER TO SET IT BACK NAXELA")
     # try:
@@ -41,7 +41,7 @@ def configure_world():
 def configure_lights():
     pass
 
-def configure_meshes(self):
+def configure_meshes(objectids_to_process):
 
     if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
         print("Configuring meshes: Start")
@@ -49,13 +49,13 @@ def configure_meshes(self):
     if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
         print("Configuring meshes: Material restore")
 
-    for obj_id in self.objectids_to_process:
+    for obj_id in objectids_to_process:
         obj = bpy.context.scene.objects[obj_id]
         cache.backup_material_restore(obj)
 
     if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
         print("Configuring meshes: Material rename check")
-    for obj_id in self.objectids_to_process:
+    for obj_id in objectids_to_process:
         obj = bpy.context.scene.objects[obj_id]
         cache.backup_material_rename(obj)
 
@@ -81,7 +81,7 @@ def configure_meshes(self):
         print("Object: Setting UV, converting modifiers and prepare channels")
 
     #OBJECT: Set UV, CONVERT AND PREPARE
-    for obj_id in self.objectids_to_process:
+    for obj_id in objectids_to_process:
         obj = bpy.context.scene.objects[obj_id]
                 
         print("Preparing: UV initiation for object: " + obj.name)
@@ -134,7 +134,7 @@ def configure_meshes(self):
         bpy.ops.object.select_all(action='DESELECT')
         
         #Atlas: Set UV, CONVERT AND PREPARE
-        for obj_id in self.objectids_to_process:
+        for obj_id in objectids_to_process:
             obj = bpy.context.scene.objects[obj_id]
 
             if obj.TLM_ObjectProperties.tlm_atlas_pointer == atlasgroup.name:
@@ -257,7 +257,7 @@ def configure_meshes(self):
 
     #OBJECT UV PROJECTING
     print("PREPARE: OBJECTS")
-    for obj_id in self.objectids_to_process:
+    for obj_id in objectids_to_process:
         obj = bpy.context.scene.objects[obj_id]
 
         objWasHidden = False
@@ -411,16 +411,16 @@ def configure_meshes(self):
             if mainNode.type not in ['BSDF_PRINCIPLED','BSDF_DIFFUSE','GROUP']:
 
                 #TODO! FIND THE PRINCIPLED PBR
-                self.report({'INFO'}, "The primary material node is not supported. Seeking first principled.")
+                #self.report({'INFO'}, "The primary material node is not supported. Seeking first principled.")
 
                 if len(find_node_by_type(nodetree.nodes, Node_Types.pbr_node)) > 0: 
                     mainNode = find_node_by_type(nodetree.nodes, Node_Types.pbr_node)[0]
                 else:
-                    self.report({'INFO'}, "No principled found. Seeking diffuse")
+                    #self.report({'INFO'}, "No principled found. Seeking diffuse")
                     if len(find_node_by_type(nodetree.nodes, Node_Types.diffuse)) > 0: 
                         mainNode = find_node_by_type(nodetree.nodes, Node_Types.diffuse)[0]
-                    else:
-                        self.report({'INFO'}, "No supported nodes. Continuing anyway.")
+                    #else:
+                        #self.report({'INFO'}, "No supported nodes. Continuing anyway.")
 
             if mainNode.type == 'GROUP':
                 if mainNode.node_tree != "Armory PBR":

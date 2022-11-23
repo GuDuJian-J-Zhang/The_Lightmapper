@@ -3,7 +3,7 @@ import bpy, math
 #from . import cache
 from .. utility import *
 
-def init(self, prev_container):
+def init(objectids_to_process, prev_container):
 
     #store_existing(prev_container)
 
@@ -13,7 +13,7 @@ def init(self, prev_container):
 
     configure_lights()
 
-    configure_meshes(self)
+    configure_meshes(objectids_to_process)
 
 def configure_world():
     pass
@@ -21,7 +21,7 @@ def configure_world():
 def configure_lights():
     pass
 
-def configure_meshes(self):
+def configure_meshes(objectids_to_process):
 
     for mat in bpy.data.materials:
         if mat.users < 1:

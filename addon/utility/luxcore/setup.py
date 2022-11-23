@@ -2,7 +2,7 @@ import bpy
 
 from .. utility import *
 
-def init(self, prev_container):
+def init(objectids_to_process, prev_container):
 
     #TODO - JSON classes
     export.scene = """scene.camera.cliphither = 0.1
