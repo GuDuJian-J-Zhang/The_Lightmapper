@@ -5,13 +5,15 @@ if __name__=="__main__":
 
    pipe = subprocess.Popen([
     "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe", 
-    "--background", 
+    "--background",
     "--python", 'C:/BlenderStuff/addons/The_Lightmapper/test.py'
     ], 
     shell=True, 
     stdout=subprocess.PIPE)
 
    stdout = pipe.communicate()[0]
+
+   print(stdout)
 
    print("Baking finished...")
 

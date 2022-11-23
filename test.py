@@ -1,4 +1,3 @@
-import subprocess
 import bpy
 from bpy import context
 import The_Lightmapper
@@ -51,4 +50,7 @@ def bake():
    utility_build.write_light_map_to_object()
 
 if __name__=="__main__":
-   bake()
+
+    if bpy.app.background:
+        bpy.ops.debug.connect_debugger_vscode(waitForClient=True)
+    bake()
