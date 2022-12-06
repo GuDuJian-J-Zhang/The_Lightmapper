@@ -51,6 +51,6 @@ def bake():
 
 if __name__=="__main__":
 
-    if bpy.app.background:
-        bpy.ops.debug.connect_debugger_vscode(waitForClient=True)
+    #if bpy.app.background:
+    #    bpy.ops.debug.connect_debugger_vscode(waitForClient=True)
     bake()

@@ -2,7 +2,6 @@ import subprocess
 
 if __name__=="__main__":
    baking = True
-
    pipe = subprocess.Popen([
     "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe", 
     "--background",
