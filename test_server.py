@@ -4,6 +4,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
 import json
+from gltflib import GLTF
 from markupsafe import escape
 import imageio
 
@@ -77,10 +78,24 @@ def baking_result_(file_name):
 def download_file(file_name):
     file_folder = "C:/SourceModels/GIDemoScenes/Room/Blender"
     file_path = file_folder + "/" + file_name
-    with open(file_path, 'rb') as my_file:
+    split_tup = os.path.splitext(file_name)
+    ext = ""
+    if len(split_tup) >= 2:
+        ext = split_tup[1]
+    if ext == ".gltf":
+       return download_gltf(file_path)
+    else:
+        with open(file_path, 'rb') as my_file:
+            content = my_file.read()
+            return content
+
+
+def download_gltf(file_path):
+    gltf = GLTF.load(file_path)
+    gltf.export_glb(file_path+".glb")
+    with open(file_path+".glb", 'rb') as my_file:
         content = my_file.read()
         return content
-
 
 @socketio.on('connect')
 def on_connect():

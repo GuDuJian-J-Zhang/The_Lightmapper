@@ -1,3 +1,7 @@
+## install [pycharm](https://www.jetbrains.com/pycharm/download)
+## run `pip install -r requirements.txt` to install the dependencies
+## open test_server.py then right-click, pick `run` or `debug` on the popped context menu, like below:
+![img.png](img.png)
 ## The Lightmapper
 
 ![](img/a.png)
