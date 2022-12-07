@@ -1,7 +1,7 @@
 # save this as app.py
 import subprocess
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response, stream_with_context, send_file
 from flask_socketio import SocketIO, emit
 import json
 from gltflib import GLTF
@@ -74,7 +74,7 @@ def baking_result_(file_name):
         return content
 
 
-@app.route("/file/<file_name>", methods=['GET'])
+@app.route("/file/<file_name>", methods=['GET', 'HEAD'])
 def download_file(file_name):
     file_folder = "C:/SourceModels/GIDemoScenes/Room/Blender"
     file_path = file_folder + "/" + file_name
@@ -83,19 +83,35 @@ def download_file(file_name):
     if len(split_tup) >= 2:
         ext = split_tup[1]
     if ext == ".gltf":
-       return download_gltf(file_path)
+        gltf = GLTF.load(file_path)
+        gltf.export_glb(file_path+".glb")
+        return do_download(file_path + ".glb")
     else:
-        with open(file_path, 'rb') as my_file:
-            content = my_file.read()
-            return content
+        return do_download(file_path)
+        # with open(file_path, 'rb') as my_file:
+        #     content = my_file.read()
+        #     return content
 
 
-def download_gltf(file_path):
-    gltf = GLTF.load(file_path)
-    gltf.export_glb(file_path+".glb")
-    with open(file_path+".glb", 'rb') as my_file:
-        content = my_file.read()
-        return content
+def read_file_in_chunks(file_path, chunk_size=1024 * 10):
+    with open(file_path, 'rb') as my_file:
+        while True:
+            chunk = my_file.read(chunk_size)
+            if chunk:
+                yield chunk
+            else:  # The chunk was empty, which means we're at the end of the file
+                my_file.close()
+
+
+def do_download(file_path):
+    if request.method == "HEAD":
+        file_size = os.path.getsize(file_path)
+        resp = Response()
+        resp.headers['Content-Length'] = file_size
+        return resp
+    else:
+        return app.response_class(stream_with_context(read_file_in_chunks(file_path)))
+
 
 @socketio.on('connect')
 def on_connect():
