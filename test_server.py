@@ -5,6 +5,8 @@ from flask import Flask, jsonify, request, Response, stream_with_context, send_f
 from flask_socketio import SocketIO, emit
 import json
 from gltflib import GLTF
+import psutil
+import signal
 from markupsafe import escape
 import imageio
 
@@ -12,6 +14,16 @@ app = Flask(__name__)
 #app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, logger=True, engineio_logger=True)
 
+
+class EngineStatus:
+    mbUseable = True
+    mSid = ""
+    cloudModel = ""
+    mPid =""
+
+engine_list = {}
+
+master_slaves = {}
 
 @app.route("/bake", methods=['POST'])
 def bake():
@@ -105,13 +117,19 @@ def do_download(file_path):
 
 @socketio.on('connect')
 def on_connect():
-    sid_list = list(socketio.server.environ.keys())
-    sid = sid_list[0]
+    pid = request.values.get("pid")
+    e = EngineStatus()
+    e.mbUseable = True
+    e.mSid = request.sid
+    e.mPid = int(pid)
+    engine_list[e.mPid]=e
+
     emit('message', {'data': ""})
 
 
 @socketio.on('disconnect')
 def on_disconnect():
+    del engine_list[request.sid]
     print('Client disconnected')
 
 
@@ -133,6 +151,13 @@ example for StartEngine command
     }
 }
 
+example for Shutdown command
+{
+    "Func": "Shutdown"
+    "Params": {
+    }
+}
+
 example for SyncWithEngine command
 {
     "Func": "SyncWithEngine"
@@ -145,25 +170,39 @@ example for SyncWithEngine command
 """
 @socketio.on('dispatch')
 def on_dispatch(msg):
+    #emit('message', {"state": 0, "progress": "Baking"}, to=request.sid)
     func_and_params = json.loads(msg)
     func_name = func_and_params["Func"]
-    params = func_and_params["Params"]
     if func_name == "Bake":
         emit('message', {"state": 0, "progress": "Baking"})
         return do_bake()
     elif func_name == "StartEngine":
+        params = func_and_params["Params"]
         return do_start_engine(params)
+    elif func_name == "Shutdown":
+        return do_shutdown()
+    elif func_name == "SyncStatus":
+        params = func_and_params["Params"]
+        return do_sync_status(params)
 
 
 @socketio.on('inquire')
-def on_inquire(message):
-    emit('message', {'data': message['data']})
+def on_inquire(msg):
+    func_and_params = json.loads(msg)
+    func_name = func_and_params["Func"]
+    params = func_and_params["Params"]
+    if func_name == "GetEngineID":
+        return do_get_enigne_id()
 
 
 @socketio.on_error_default
 def default_error_handler(e):
     print(request.event["message"]) # "my error event"
     print(request.event["args"])    # (data,)
+
+
+def do_get_enigne_id():
+    return
 
 
 def do_bake():
@@ -194,9 +233,42 @@ def do_start_engine(json_params):
         os.chdir("C:/GWCPEngine/geditor/build/bin/Debug")
         pipe = subprocess.Popen([
             "C:/GWCPEngine/geditor/build/bin/Debug/CPRenderInstance.exe"],
-            shell=True,
+            shell=False,
             stdout=subprocess.PIPE)
-    return pipe.pid
+        master_sid = request.sid
+        slave_pid = pipe.pid
+        slaves = master_slaves.get(master_sid)
+        if slaves is None:
+            slaves = [slave_pid]
+            master_slaves[master_sid] = slaves
+        else:
+            slaves.append(slave_pid)
+        return slave_pid
+
+    return 0
+
+
+def do_shutdown():
+    master_sid = request.sid
+    slaves = master_slaves.get(master_sid)
+    for pid in slaves:
+        p = psutil.Process(pid)
+        p.terminate()  # or p.kill()
+    slaves = []
+
+
+def do_sync_status(json_params):
+    master_sid = request.sid
+    msg_json = dict()
+    msg_json["Func"] = "SyncStatus"
+    msg_json["Params"] = json_params
+    slaves = master_slaves.get(master_sid)
+    if slaves is not None:
+        for pid in slaves:
+            engine = engine_list.get(pid)
+            if engine is not None:
+                json_str = json.dumps(msg_json)
+                emit('message', json_str, to=engine.mSid)
 
 
 def get_lightmap_file_infos():
