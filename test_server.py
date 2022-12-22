@@ -181,9 +181,8 @@ def on_dispatch(msg):
         return do_start_engine(params)
     elif func_name == "Shutdown":
         return do_shutdown()
-    elif func_name == "SyncStatus":
-        params = func_and_params["Params"]
-        return do_sync_status(params)
+    else:
+        return do_sync_status(msg)
 
 
 @socketio.on('inquire')
@@ -257,18 +256,14 @@ def do_shutdown():
     slaves = []
 
 
-def do_sync_status(json_params):
+def do_sync_status(msg):
     master_sid = request.sid
-    msg_json = dict()
-    msg_json["Func"] = "SyncStatus"
-    msg_json["Params"] = json_params
     slaves = master_slaves.get(master_sid)
     if slaves is not None:
         for pid in slaves:
             engine = engine_list.get(pid)
             if engine is not None:
-                json_str = json.dumps(msg_json)
-                emit('message', json_str, to=engine.mSid)
+                emit('message', msg, to=engine.mSid)
 
 
 def get_lightmap_file_infos():
