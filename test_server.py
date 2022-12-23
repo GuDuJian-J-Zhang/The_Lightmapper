@@ -25,6 +25,14 @@ engine_list = {}
 
 master_slaves = {}
 
+"""
+set below four variables as your local setting
+"""
+gm_path = "C:/GWCPEngine/geditor/build/bin/Debug/CPRenderInstance.exe"
+gltf_folder = "C:/SourceModels/GIDemoScenes/Room/Sponza/glTF"
+lightmaps_folder = "C:/SourceModels/GIDemoScenes/Room/Blender/Lightmaps"
+blender_path = "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe"
+
 @app.route("/bake", methods=['POST'])
 def bake():
     baking = True
@@ -51,11 +59,10 @@ def bake():
 
 @app.route("/baking_results", methods=['GET'])
 def baking_result():
-    lightmap_folder = "C:/SourceModels/GIDemoScenes/Room/Blender/Lightmaps"
     file_info_list = []
-    directories = os.listdir(lightmap_folder)
+    directories = os.listdir(lightmaps_folder)
     for file_name in directories:
-        file_size = os.path.getsize(lightmap_folder + "/" + file_name)
+        file_size = os.path.getsize(lightmaps_folder + "/" + file_name)
         file_info = {"name": file_name, "size": file_size}
         file_info_list.append(file_info)
 
@@ -68,8 +75,7 @@ def baking_result():
 
 @app.route("/baking_results/<file_name>", methods=['GET'])
 def baking_result_(file_name):
-    lightmap_folder = "C:/SourceModels/GIDemoScenes/Room/Blender/Lightmaps"
-    file_path = lightmap_folder + "/" + file_name
+    file_path = lightmaps_folder + "/" + file_name
     with open(file_path, 'rb') as my_file:
         content = my_file.read()
         return content
@@ -77,7 +83,7 @@ def baking_result_(file_name):
 
 @app.route("/file/<file_name>", methods=['GET', 'HEAD'])
 def download_file(file_name):
-    file_folder = "C:/SourceModels/GIDemoScenes/Room/Blender"
+    file_folder = gltf_folder
     file_path = file_folder + "/" + file_name
     split_tup = os.path.splitext(file_name)
     ext = ""
@@ -206,7 +212,7 @@ def do_get_enigne_id():
 
 def do_bake():
     # pipe = subprocess.Popen([
-    # "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe",
+    # blender_path,
     # "--background",
     # "--python", 'C:/BlenderStuff/addons/The_Lightmapper/test.py'
     # ],
@@ -216,9 +222,8 @@ def do_bake():
     # stdout = pipe.communicate()[0]
     #
     # print(stdout)
-    lightmap_folder = "C:/SourceModels/GIDemoScenes/Room/Blender/Lightmaps"
     file_name = "Kitchen_baked_DIFFUSE.hdr"
-    file_size = os.path.getsize(lightmap_folder + "/" + file_name)
+    file_size = os.path.getsize(lightmaps_folder + "/" + file_name)
     return file_name, file_size
 
 
@@ -229,9 +234,8 @@ def do_bake():
 """
 def do_start_engine(json_params):
     if json_params["EngineType"] == "GM":
-        os.chdir("C:/GWCPEngine/geditor/build/bin/Debug")
         pipe = subprocess.Popen([
-            "C:/GWCPEngine/geditor/build/bin/Debug/CPRenderInstance.exe"],
+            gm_path],
             shell=False,
             stdout=subprocess.PIPE)
         master_sid = request.sid
