@@ -6,6 +6,7 @@ from flask_socketio import SocketIO, emit
 import json
 from gltflib import GLTF
 import psutil
+import time
 import signal
 from markupsafe import escape
 import imageio
@@ -28,10 +29,31 @@ master_slaves = {}
 """
 set below four variables as your local setting
 """
-gm_path = "C:/GWCPEngine/geditor/build/bin/Debug/CPRenderInstance.exe"
+appinfo_path = "C:/GWCPEngine/Render/build/bin/Debug/DeviceAssets/AppInfo_desktop.txt"
+gm_path = "C:/GWCPEngine/Render/build/bin/Debug/CPRenderInstance.exe"
 gltf_folder = "C:/SourceModels/GIDemoScenes/Room/Sponza/glTF"
 lightmaps_folder = "C:/SourceModels/GIDemoScenes/Room/Blender/Lightmaps"
 blender_path = "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe"
+clouding_rendering_result_path = "C:/GWCPEngine/Render/build/bin/Debug/files/CloudingRendering"
+
+def modify_app_info(new_value):
+    config_lines = []
+    with open(appinfo_path, 'r', encoding='utf-8') as read_file:
+        while True:
+            # Get next line from file
+            line = read_file.readline()
+            if "-cloudmode" in line:
+                line = '"-cloudmode"=\"' + new_value + "\"\n"
+            if not line:
+                break
+            else:
+                config_lines.append(line)
+    read_file.close()
+
+    with open(appinfo_path, 'w+') as write_file:
+        for line in config_lines:
+            write_file.write(line)
+    write_file.close()
 
 @app.route("/bake", methods=['POST'])
 def bake():
@@ -99,6 +121,13 @@ def download_file(file_name):
         # with open(file_path, 'rb') as my_file:
         #     content = my_file.read()
         #     return content
+
+
+@app.route("/file/CloudingRendering/<file_name>", methods=['GET', 'HEAD'])
+def download_cloud_rendering_file(file_name):
+    file_folder = clouding_rendering_result_path
+    file_path = file_folder + "/" + file_name
+    return do_download(file_path)
 
 
 def read_file_in_chunks(file_path, chunk_size=1024 * 10):
@@ -190,6 +219,13 @@ def on_dispatch(msg):
     else:
         return do_sync_status(msg)
 
+@socketio.on('response')
+def on_response(msg):
+    #emit('message', {"state": 0, "progress": "Baking"}, to=request.sid)
+    func_and_params = json.loads(msg)
+    func_name = func_and_params["Func"]
+    do_response(msg)
+
 
 @socketio.on('inquire')
 def on_inquire(msg):
@@ -234,12 +270,15 @@ def do_bake():
 """
 def do_start_engine(json_params):
     if json_params["EngineType"] == "GM":
+        modify_app_info("server")
         pipe = subprocess.Popen([
             gm_path],
             shell=False,
             stdout=subprocess.PIPE)
         master_sid = request.sid
         slave_pid = pipe.pid
+        time.sleep(2)
+        modify_app_info("client")
         slaves = master_slaves.get(master_sid)
         if slaves is None:
             slaves = [slave_pid]
@@ -269,6 +308,22 @@ def do_sync_status(msg):
             if engine is not None:
                 emit('message', msg, to=engine.mSid)
 
+def do_response(msg):
+    slave_sid = request.sid
+    # emit('response', msg, to=slave_sid)
+    # return
+    master_mid = None
+    for key in master_slaves:
+        value = master_slaves[key]
+        for pid in value:
+            engine = engine_list.get(pid)
+            if engine is not None:
+                if engine.mSid == slave_sid:
+                    master_mid = key
+                    break
+        if master_mid is not None:
+            emit('response', msg, to=master_mid)
+            break
 
 def get_lightmap_file_infos():
     return
