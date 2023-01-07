@@ -221,9 +221,6 @@ def on_dispatch(msg):
 
 @socketio.on('response')
 def on_response(msg):
-    #emit('message', {"state": 0, "progress": "Baking"}, to=request.sid)
-    func_and_params = json.loads(msg)
-    func_name = func_and_params["Func"]
     do_response(msg)
 
 
