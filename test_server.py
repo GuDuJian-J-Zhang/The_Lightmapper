@@ -274,7 +274,7 @@ def do_start_engine(json_params):
             stdout=subprocess.PIPE)
         master_sid = request.sid
         slave_pid = pipe.pid
-        time.sleep(2)
+        time.sleep(5)
         modify_app_info("client")
         slaves = master_slaves.get(master_sid)
         if slaves is None:
