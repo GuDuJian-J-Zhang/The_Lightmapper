@@ -91,7 +91,7 @@ def bake(objectids_to_process, plus_pass=0):
 
         
         #Save image between
-        if scene.TLM_SceneProperties.tlm_save_preprocess_lightmaps:
+        if scene.TLM_SceneProperties.tlm_save_preprocess_lightmaps or bpy.app.background:
             for image in bpy.data.images:
                 if image.name.endswith("_baked"):
 
@@ -107,14 +107,15 @@ def bake(objectids_to_process, plus_pass=0):
         bpy.ops.object.select_all(action='DESELECT')
         currentIterNum = currentIterNum + 1
 
-    for image in bpy.data.images:
-        if image.name.endswith("_baked"):
+    if not bpy.app.background:
+        for image in bpy.data.images:
+            if image.name.endswith("_baked"):
 
-            saveDir = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
-            bakemap_path = os.path.join(saveDir, image.name)
-            filepath_ext = ".hdr"
-            image.filepath_raw = bakemap_path + filepath_ext
-            image.file_format = "HDR"
-            if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
-                print("Saving to: " + image.filepath_raw)
-            image.save()
+                saveDir = os.path.join(os.path.dirname(bpy.data.filepath), bpy.context.scene.TLM_EngineProperties.tlm_lightmap_savedir)
+                bakemap_path = os.path.join(saveDir, image.name)
+                filepath_ext = ".hdr"
+                image.filepath_raw = bakemap_path + filepath_ext
+                image.file_format = "HDR"
+                if bpy.context.scene.TLM_SceneProperties.tlm_verbose:
+                    print("Saving to: " + image.filepath_raw)
+                image.save()
