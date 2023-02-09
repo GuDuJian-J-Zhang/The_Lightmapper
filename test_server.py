@@ -32,7 +32,7 @@ set below four variables as your local setting
 appinfo_path = "C:/GWCPEngine/Render/build/bin/Debug/DeviceAssets/AppInfo_desktop.txt"
 gm_path = "C:/GWCPEngine/Render/build/bin/Debug/CPRenderInstance.exe"
 gltf_folder = "C:/SourceModels/GIDemoScenes/Room/Sponza/glTF"
-lightmaps_folder = "C:/SourceModels/GIDemoScenes/Room/Blender/Lightmaps"
+lightmaps_folder = "C:/SourceModels/GIDemoScenes/Room/Blender2/Lightmaps"
 blender_path = "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe"
 clouding_rendering_result_path = "C:/GWCPEngine/Render/build/bin/Debug/files/CloudingRendering"
 
@@ -85,12 +85,12 @@ def baking_result():
     directories = os.listdir(lightmaps_folder)
     for file_name in directories:
         file_size = os.path.getsize(lightmaps_folder + "/" + file_name)
-        file_info = {"name": file_name, "size": file_size}
+        file_info = {"Name": file_name, "Size": file_size}
         file_info_list.append(file_info)
 
     res = {
-        'state': 0,
-        'file_info_list': file_info_list
+        'State': 0,
+        'FileInfoList': file_info_list
     }
     return res
 
@@ -214,6 +214,9 @@ def on_dispatch(msg):
     elif func_name == "StartEngine":
         params = func_and_params["Params"]
         return do_start_engine(params)
+    elif func_name == "BlenderBaking":
+        params = func_and_params["Params"]
+        return do_blender_baking(params)
     elif func_name == "Shutdown":
         return do_shutdown()
     else:
@@ -285,6 +288,26 @@ def do_start_engine(json_params):
         return slave_pid
 
     return 0
+
+
+def do_blender_baking(json_params):
+    # pipe = subprocess.Popen([
+    #     "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe",
+    #     "--background",
+    #     "--python", 'C:/BlenderStuff/addons/The_Lightmapper/test.py'
+    # ],
+    #     shell=True,
+    #     stdout=subprocess.PIPE)
+    #
+    # stdout = pipe.communicate()[0]
+    #
+    # print(stdout)
+    res = baking_result()
+    rt = {
+        "Func": "BlenderBakingFinished",
+        "Params": res
+    }
+    emit('response', json.dumps(rt), to=request.sid)
 
 
 def do_shutdown():
