@@ -107,7 +107,7 @@ def bake(objectids_to_process, plus_pass=0):
         bpy.ops.object.select_all(action='DESELECT')
         currentIterNum = currentIterNum + 1
 
-    if not bpy.app.background:
+    if not bpy.app.background and not scene.TLM_SceneProperties.tlm_save_preprocess_lightmaps:
         for image in bpy.data.images:
             if image.name.endswith("_baked"):
 
