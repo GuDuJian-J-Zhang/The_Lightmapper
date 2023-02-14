@@ -7,7 +7,7 @@ from The_Lightmapper.addon.utility import build as utility_build
 # Reload the current file and select all.
 
 def bake():
-   bpy.ops.wm.open_mainfile(filepath="C:/SourceModels/GIDemoScenes/Room/Blender/Room.blend")
+   bpy.ops.wm.open_mainfile(filepath="C:/SourceModels/GIDemoScenes/Room/Blender2/Room.blend")
    object_id = 0
    objectids_to_process = []
    for obj in bpy.context.scene.objects:

@@ -8,15 +8,6 @@ from gltflib import GLTF
 import psutil
 import time
 
-"""
-blender stuff
-"""
-
-import bpy
-from bpy import utils
-import addon.operators.tlm as tlm
-from addon.utility import build as utility_build
-
 app = Flask(__name__)
 #app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, logger=True, engineio_logger=True)
@@ -44,6 +35,14 @@ clouding_rendering_result_path = "C:/GWCPEngine/Render/build/bin/Debug/files/Clo
 The_Lightmapper_path = "C:/BlenderStuff/addons/The_Lightmapper/__init__.py"
 UV_Packer_path = "C:/BlenderStuff/addons/UV-Packer/__init__.py"
 
+"""
+blender stuff
+"""
+
+import bpy
+from bpy import utils
+import addon.operators.tlm as tlm
+from addon.utility import build as utility_build
 def install_addon(addon_path, addon_name):
     bpy.ops.preferences.addon_install(overwrite=True, target='DEFAULT', filepath=addon_path)
     # for mod in utils._addon_utils.modules():
@@ -348,20 +347,20 @@ def do_start_engine(json_params):
 
 
 def do_blender_baking(json_params):
-    # pipe = subprocess.Popen([
-    #     "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe",
-    #     "--background",
-    #     "--python", 'C:/BlenderStuff/addons/The_Lightmapper/test.py'
-    # ],
-    #     shell=True,
-    #     stdout=subprocess.PIPE)
-    #
-    # stdout = pipe.communicate()[0]
-    #
+    pipe = subprocess.Popen([
+        "C:/Program Files/Blender Foundation/Blender 3.3/blender.exe",
+        "--background",
+        "--python", 'C:/BlenderStuff/addons/The_Lightmapper/test.py'
+    ],
+        shell=True,
+        stdout=subprocess.PIPE)
+
+    stdout = pipe.communicate()[0]
+
     # print(stdout)
-    install_addon(The_Lightmapper_path, 'The_Lightmapper')
-    install_addon(UV_Packer_path, 'UV-Packer')
-    bake2()
+    # install_addon(The_Lightmapper_path, 'The_Lightmapper')
+    # install_addon(UV_Packer_path, 'UV-Packer')
+    # bake2()
     res = baking_result()
     rt = {
         "Func": "BlenderBakingFinished",
@@ -410,5 +409,6 @@ def get_lightmap_file_infos():
 
 
 if __name__=="__main__":
+    # bpy.ops.wm.open_mainfile(filepath="C:/SourceModels/GIDemoScenes/Room/Blender2/Room.blend")
     socketio.run(app, allow_unsafe_werkzeug = True)
     # do_blender_baking("")

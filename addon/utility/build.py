@@ -1041,7 +1041,7 @@ def manage_build(objectids_to_process, background_pass=False, load_atlas=0):
 
                 bpy.app.driver_namespace["tlm_plus_mode"] = 2
 
-                prepare_build(objectids_to_process, background_mode=False, shutdown_after_build=False)
+                prepare_build(objectids_to_process, bpy.app.background, shutdown_after_build=False)
 
                 if not background_pass and bpy.context.scene.TLM_EngineProperties.tlm_lighting_mode != "combinedao":
                     #pass
