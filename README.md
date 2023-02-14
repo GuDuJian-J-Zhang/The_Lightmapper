@@ -1,5 +1,11 @@
+## install Python-3.10.*
 ## install [pycharm](https://www.jetbrains.com/pycharm/download)
 ## run `pip install -r requirements.txt` to install the dependencies
+## download [bpy](https://builder.blender.org/download/bpy/)
+## pip install bpy-*.whl
+## install blender add-ons into `Python310\Lib\site-packages\bpy\3.4\scripts\addons`
+ - download and install [UV-Packer](https://www.uv-packer.com/blender/)
+ - install [The_Lightmapper](https://git-rd.office.gritworld.cn/AndroidEngine/thirdparty/The_Lightmapper)
 ## open test_server.py then right-click, pick `run` or `debug` on the popped context menu, like below:
 ![img.png](img.png)
 ## The Lightmapper
